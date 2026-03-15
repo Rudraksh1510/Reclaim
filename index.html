@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Reclaim — Lost & Found Platform</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --bg:#0a0a0f;
+    --bg2:#111118;
+    --bg3:#1a1a24;
+    --card:#16161f;
+    --card2:#1e1e2a;
+    --border:#2a2a3a;
+    --border2:#363650;
+    --accent:#7c6aff;
+    --accent2:#a594ff;
+    --accent-dim:#7c6aff22;
+    --found:#22d3a0;
+    --found-dim:#22d3a022;
+    --lost:#ff6b6b;
+    --lost-dim:#ff6b6b22;
+    --returned:#f59e0b;
+    --returned-dim:#f59e0b22;
+    --text:#f0eeff;
+    --text2:#9898b8;
+    --text3:#5a5a7a;
+    --font-display:'Syne',sans-serif;
+    --font-body:'DM Sans',sans-serif;
+    --r:12px;
+    --r2:20px;
+  }
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--text);font-family:var(--font-body);min-height:100vh;overflow-x:hidden}
+  #app{min-height:100vh}
+
+  /* NAV */
+  nav{position:sticky;top:0;z-index:100;background:rgba(10,10,15,0.85);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:0 2rem;display:flex;align-items:center;justify-content:space-between;height:64px}
+  .logo{font-family:var(--font-display);font-size:1.5rem;font-weight:800;background:linear-gradient(135deg,var(--accent2),var(--found));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;cursor:pointer;letter-spacing:-0.5px}
+  .nav-links{display:flex;align-items:center;gap:0.5rem}
+  .nav-btn{background:none;border:1px solid var(--border2);color:var(--text2);font-family:var(--font-body);font-size:0.875rem;padding:0.5rem 1rem;border-radius:8px;cursor:pointer;transition:all 0.2s}
+  .nav-btn:hover{background:var(--card2);color:var(--text);border-color:var(--border2)}
+  .nav-btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:500}
+  .nav-btn.primary:hover{background:var(--accent2);border-color:var(--accent2)}
+
+  /* HERO */
+  .hero{padding:6rem 2rem 4rem;text-align:center;position:relative;overflow:hidden}
+  .hero::before{content:'';position:absolute;top:-200px;left:50%;transform:translateX(-50%);width:800px;height:600px;background:radial-gradient(ellipse,rgba(124,106,255,0.15) 0%,transparent 70%);pointer-events:none}
+  .hero-badge{display:inline-flex;align-items:center;gap:0.5rem;background:var(--accent-dim);border:1px solid rgba(124,106,255,0.3);color:var(--accent2);font-size:0.8rem;font-weight:500;padding:0.4rem 1rem;border-radius:20px;margin-bottom:2rem;letter-spacing:0.5px}
+  .hero h1{font-family:var(--font-display);font-size:clamp(2.5rem,6vw,5rem);font-weight:800;line-height:1.05;letter-spacing:-2px;margin-bottom:1.5rem}
+  .hero h1 span{background:linear-gradient(135deg,var(--accent2),var(--found));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+  .hero p{font-size:1.15rem;color:var(--text2);max-width:560px;margin:0 auto 3rem;line-height:1.7;font-weight:300}
+  .hero-btns{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap}
+  .btn-lost{background:var(--lost-dim);border:1px solid rgba(255,107,107,0.4);color:var(--lost);font-family:var(--font-display);font-weight:600;font-size:1rem;padding:0.9rem 2rem;border-radius:var(--r);cursor:pointer;transition:all 0.25s;display:flex;align-items:center;gap:0.6rem}
+  .btn-lost:hover{background:var(--lost);color:#fff;transform:translateY(-2px);box-shadow:0 8px 30px rgba(255,107,107,0.3)}
+  .btn-found{background:var(--found-dim);border:1px solid rgba(34,211,160,0.4);color:var(--found);font-family:var(--font-display);font-weight:600;font-size:1rem;padding:0.9rem 2rem;border-radius:var(--r);cursor:pointer;transition:all 0.25s;display:flex;align-items:center;gap:0.6rem}
+  .btn-found:hover{background:var(--found);color:#0a0a0f;transform:translateY(-2px);box-shadow:0 8px 30px rgba(34,211,160,0.3)}
+
+  /* STATS */
+  .stats{display:flex;gap:1px;background:var(--border);border:1px solid var(--border);border-radius:var(--r2);overflow:hidden;max-width:600px;margin:3rem auto 0}
+  .stat{flex:1;background:var(--card);padding:1.5rem;text-align:center}
+  .stat-n{font-family:var(--font-display);font-size:2rem;font-weight:800;color:var(--text)}
+  .stat-l{font-size:0.8rem;color:var(--text3);margin-top:0.25rem;text-transform:uppercase;letter-spacing:1px}
+
+  /* SECTION */
+  .section{max-width:1200px;margin:0 auto;padding:2rem}
+  .section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:2rem;flex-wrap:gap}
+  .section-title{font-family:var(--font-display);font-size:1.5rem;font-weight:700;letter-spacing:-0.5px}
+
+  /* SEARCH/FILTER BAR */
+  .filter-bar{background:var(--card);border:1px solid var(--border);border-radius:var(--r2);padding:1.5rem;margin-bottom:2rem}
+  .filter-row{display:grid;grid-template-columns:1fr auto auto auto;gap:0.75rem;align-items:center}
+  .search-wrap{position:relative}
+  .search-wrap svg{position:absolute;left:1rem;top:50%;transform:translateY(-50%);color:var(--text3)}
+  input,select,textarea{background:var(--bg3);border:1px solid var(--border);color:var(--text);font-family:var(--font-body);font-size:0.9rem;border-radius:var(--r);padding:0.7rem 1rem;width:100%;outline:none;transition:border-color 0.2s}
+  input:focus,select:focus,textarea:focus{border-color:var(--accent)}
+  .search-wrap input{padding-left:2.8rem}
+  select option{background:var(--bg3)}
+  .filter-chip{background:var(--bg3);border:1px solid var(--border);color:var(--text2);font-family:var(--font-body);font-size:0.875rem;padding:0.7rem 1.25rem;border-radius:var(--r);cursor:pointer;transition:all 0.2s;white-space:nowrap}
+  .filter-chip.active{background:var(--accent-dim);border-color:var(--accent);color:var(--accent2)}
+
+  /* CARDS GRID */
+  .cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1.5rem}
+  .item-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r2);overflow:hidden;cursor:pointer;transition:all 0.25s;position:relative}
+  .item-card:hover{border-color:var(--border2);transform:translateY(-4px);box-shadow:0 20px 60px rgba(0,0,0,0.4)}
+  .item-card::after{content:'';position:absolute;inset:0;border-radius:var(--r2);opacity:0;transition:opacity 0.25s;pointer-events:none;background:linear-gradient(135deg,rgba(124,106,255,0.05),transparent)}
+  .item-card:hover::after{opacity:1}
+  .card-img{width:100%;height:200px;object-fit:cover;background:var(--bg3);display:flex;align-items:center;justify-content:center;color:var(--text3);font-size:3rem}
+  .card-img img{width:100%;height:100%;object-fit:cover}
+  .card-body{padding:1.25rem}
+  .card-status{display:inline-flex;align-items:center;gap:0.4rem;font-size:0.75rem;font-weight:600;padding:0.3rem 0.75rem;border-radius:20px;margin-bottom:0.75rem;letter-spacing:0.5px;text-transform:uppercase}
+  .status-lost{background:var(--lost-dim);color:var(--lost);border:1px solid rgba(255,107,107,0.3)}
+  .status-found{background:var(--found-dim);color:var(--found);border:1px solid rgba(34,211,160,0.3)}
+  .status-returned{background:var(--returned-dim);color:var(--returned);border:1px solid rgba(245,158,11,0.3)}
+  .card-title{font-family:var(--font-display);font-size:1.1rem;font-weight:700;margin-bottom:0.5rem;letter-spacing:-0.3px}
+  .card-meta{display:flex;flex-direction:column;gap:0.3rem}
+  .card-meta-row{display:flex;align-items:center;gap:0.4rem;font-size:0.8rem;color:var(--text3)}
+  .card-meta-row svg{flex-shrink:0}
+
+  /* MODAL OVERLAY */
+  .overlay{position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:200;display:flex;align-items:center;justify-content:center;padding:1rem;opacity:0;pointer-events:none;transition:opacity 0.25s;backdrop-filter:blur(8px)}
+  .overlay.open{opacity:1;pointer-events:all}
+  .modal{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r2);width:100%;max-width:700px;max-height:90vh;overflow-y:auto;position:relative;transform:translateY(20px);transition:transform 0.25s}
+  .overlay.open .modal{transform:translateY(0)}
+  .modal-close{position:absolute;top:1rem;right:1rem;background:var(--bg3);border:1px solid var(--border);color:var(--text2);width:36px;height:36px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:1.1rem;transition:all 0.2s;z-index:10}
+  .modal-close:hover{background:var(--card2);color:var(--text);border-color:var(--border2)}
+
+  /* FORM */
+  .form-modal{padding:2rem}
+  .form-title{font-family:var(--font-display);font-size:1.75rem;font-weight:800;letter-spacing:-0.5px;margin-bottom:0.5rem}
+  .form-subtitle{color:var(--text2);font-size:0.9rem;margin-bottom:2rem}
+  .form-grid{display:grid;gap:1.25rem}
+  .form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+  .field{display:flex;flex-direction:column;gap:0.5rem}
+  label{font-size:0.85rem;font-weight:500;color:var(--text2);letter-spacing:0.3px}
+  textarea{resize:vertical;min-height:100px}
+  .type-toggle{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
+  .type-btn{background:none;border:none;color:var(--text2);font-family:var(--font-body);font-size:0.9rem;font-weight:500;padding:0.75rem;cursor:pointer;transition:all 0.2s}
+  .type-btn.lost.active{background:var(--lost-dim);color:var(--lost)}
+  .type-btn.found.active{background:var(--found-dim);color:var(--found)}
+  .photo-upload{border:2px dashed var(--border);border-radius:var(--r);padding:2.5rem;text-align:center;cursor:pointer;transition:all 0.2s;background:var(--bg3)}
+  .photo-upload:hover{border-color:var(--accent);background:var(--accent-dim)}
+  .photo-upload input{display:none}
+  .photo-preview{width:100%;max-height:200px;object-fit:cover;border-radius:var(--r);margin-top:1rem}
+  .submit-btn{background:var(--accent);border:none;color:#fff;font-family:var(--font-display);font-size:1rem;font-weight:700;padding:1rem 2rem;border-radius:var(--r);cursor:pointer;transition:all 0.25s;width:100%;letter-spacing:-0.3px}
+  .submit-btn:hover{background:var(--accent2);transform:translateY(-1px);box-shadow:0 8px 30px rgba(124,106,255,0.4)}
+  .submit-btn:active{transform:translateY(0)}
+
+  /* DETAIL MODAL */
+  .detail-img{width:100%;max-height:320px;object-fit:cover;border-radius:var(--r2) var(--r2) 0 0;background:var(--bg3);display:flex;align-items:center;justify-content:center;color:var(--text3);font-size:4rem;min-height:200px}
+  .detail-img img{width:100%;max-height:320px;object-fit:cover;border-radius:var(--r2) var(--r2) 0 0}
+  .detail-body{padding:2rem}
+  .detail-title{font-family:var(--font-display);font-size:1.75rem;font-weight:800;letter-spacing:-0.5px;margin-bottom:0.75rem}
+  .detail-desc{color:var(--text2);line-height:1.7;margin-bottom:1.5rem;font-size:0.95rem}
+  .detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.5rem}
+  .detail-field{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:1rem}
+  .detail-field-label{font-size:0.75rem;text-transform:uppercase;letter-spacing:1px;color:var(--text3);margin-bottom:0.35rem}
+  .detail-field-value{font-weight:500;font-size:0.95rem}
+  .map-placeholder{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:1.5rem;text-align:center;color:var(--text3);font-size:0.875rem;margin-bottom:1.5rem;position:relative;overflow:hidden}
+  .map-dots{position:absolute;inset:0;opacity:0.3;background-image:radial-gradient(var(--border2) 1px,transparent 1px);background-size:20px 20px}
+  .map-pin{font-size:2rem;display:block;margin-bottom:0.5rem;position:relative;z-index:1}
+  .contact-box{background:linear-gradient(135deg,rgba(124,106,255,0.1),rgba(34,211,160,0.1));border:1px solid var(--border2);border-radius:var(--r);padding:1.25rem}
+  .contact-label{font-size:0.8rem;text-transform:uppercase;letter-spacing:1px;color:var(--text3);margin-bottom:0.5rem}
+  .contact-value{font-size:1rem;font-weight:500;color:var(--accent2)}
+  .action-row{display:flex;gap:0.75rem;margin-top:1.5rem;flex-wrap:wrap}
+  .action-btn{flex:1;min-width:120px;padding:0.8rem 1.25rem;border-radius:var(--r);font-family:var(--font-display);font-size:0.9rem;font-weight:600;cursor:pointer;transition:all 0.2s;border:1px solid var(--border2);background:var(--card2);color:var(--text2)}
+  .action-btn:hover{color:var(--text);border-color:var(--border2)}
+  .action-btn.returned{background:var(--returned-dim);border-color:rgba(245,158,11,0.4);color:var(--returned)}
+  .action-btn.returned:hover{background:var(--returned);color:#0a0a0f}
+  .action-btn.delete{background:var(--lost-dim);border-color:rgba(255,107,107,0.3);color:var(--lost)}
+  .action-btn.delete:hover{background:var(--lost);color:#fff}
+
+  /* EMPTY */
+  .empty{text-align:center;padding:4rem 2rem;color:var(--text3)}
+  .empty-icon{font-size:3rem;margin-bottom:1rem;display:block}
+  .empty h3{font-family:var(--font-display);font-size:1.25rem;color:var(--text2);margin-bottom:0.5rem}
+
+  /* TOAST */
+  .toast-container{position:fixed;bottom:2rem;right:2rem;z-index:999;display:flex;flex-direction:column;gap:0.75rem}
+  .toast{background:var(--card);border:1px solid var(--border2);border-radius:var(--r);padding:1rem 1.5rem;font-size:0.9rem;color:var(--text);animation:slideIn 0.3s ease;display:flex;align-items:center;gap:0.75rem;max-width:320px;box-shadow:0 8px 30px rgba(0,0,0,0.4)}
+  .toast.success{border-left:4px solid var(--found)}
+  .toast.error{border-left:4px solid var(--lost)}
+  @keyframes slideIn{from{opacity:0;transform:translateX(100%)}to{opacity:1;transform:translateX(0)}}
+
+  /* ADMIN PANEL */
+  .admin-header{background:linear-gradient(135deg,rgba(255,107,107,0.1),rgba(245,158,11,0.1));border:1px solid rgba(255,107,107,0.3);border-radius:var(--r);padding:1rem 1.5rem;margin-bottom:1.5rem;display:flex;align-items:center;gap:0.75rem;font-size:0.9rem;color:var(--text2)}
+  .admin-warning{background:var(--lost-dim);border:none;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-size:0.9rem;flex-shrink:0}
+
+  /* TAGS */
+  .tag-row{display:flex;flex-wrap:wrap;gap:0.5rem;margin-bottom:1rem}
+  .tag{background:var(--bg3);border:1px solid var(--border);color:var(--text3);font-size:0.75rem;padding:0.25rem 0.75rem;border-radius:20px;letter-spacing:0.3px}
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar{width:6px}
+  ::-webkit-scrollbar-track{background:transparent}
+  ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+  ::-webkit-scrollbar-thumb:hover{background:var(--text3)}
+
+  /* RESPONSIVE */
+  @media(max-width:768px){
+    nav{padding:0 1rem}
+    .hero{padding:4rem 1rem 3rem}
+    .hero h1{font-size:2.5rem}
+    .filter-row{grid-template-columns:1fr;gap:0.5rem}
+    .form-row{grid-template-columns:1fr}
+    .detail-grid{grid-template-columns:1fr}
+    .cards-grid{grid-template-columns:1fr}
+    .section{padding:1rem}
+    .stats{flex-direction:column;gap:1px}
+  }
+  @media(max-width:480px){
+    .hero-btns{flex-direction:column;align-items:stretch}
+    .btn-lost,.btn-found{justify-content:center}
+    .modal{border-radius:var(--r) var(--r) 0 0;max-width:100%;align-self:flex-end;margin-top:auto}
+    .overlay{align-items:flex-end}
+  }
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+const DEMO_ITEMS=[
+  {id:'1',type:'lost',name:'Black Leather Wallet',desc:'Black leather bifold wallet containing ID cards and some cash. Has a distinctive red stitching on the corner.',location:'Connaught Place, New Delhi',date:'2024-03-10',contact:'raj.sharma@email.com',photo:'',status:'lost',createdAt:new Date('2024-03-10').getTime()},
+  {id:'2',type:'found',name:'Rose Gold iPhone 15',desc:'Found a rose gold iPhone 15 with a clear case. Screen has a small crack on the top left corner. Found it near the metro exit.',location:'Rajiv Chowk Metro Station, Delhi',date:'2024-03-11',contact:'+91 98765 43210',photo:'',status:'found',createdAt:new Date('2024-03-11').getTime()},
+  {id:'3',type:'lost',name:'Blue Jansport Backpack',desc:'Navy blue Jansport backpack with a keychain of a small green dinosaur. Contains a laptop charger and some notebooks.',location:'Lajpat Nagar Market, Delhi',date:'2024-03-12',contact:'priya.k@gmail.com',photo:'',status:'lost',createdAt:new Date('2024-03-12').getTime()},
+  {id:'4',type:'found',name:'Gold Chain Necklace',desc:'Found a delicate gold chain with a small heart pendant. Very clean, looks expensive. Found in the park.',location:'Lodhi Garden, New Delhi',date:'2024-03-13',contact:'+91 99887 76655',photo:'',status:'found',createdAt:new Date('2024-03-13').getTime()},
+  {id:'5',type:'lost',name:'Ray-Ban Sunglasses',desc:'Classic Ray-Ban Wayfarer sunglasses in black. Left them somewhere during lunch.',location:'Khan Market, New Delhi',date:'2024-03-14',contact:'aditya.m@outlook.com',photo:'',status:'returned',createdAt:new Date('2024-03-14').getTime()},
+  {id:'6',type:'found',name:'Tabby Cat (Orange)',desc:'Found a friendly orange tabby cat wandering near the colony. Has a blue collar but no tag. Very well-fed and calm.',location:'Vasant Vihar, New Delhi',date:'2024-03-15',contact:'+91 87654 32109',photo:'',status:'found',createdAt:new Date('2024-03-15').getTime()},
+];
+
+const EMOJIS={lost:'🔍',found:'✨',returned:'🎉'};
+const TYPE_ICONS={wallet:'👛',iphone:'📱',phone:'📱',laptop:'💻',bag:'🎒',backpack:'🎒',key:'🗝️',glasses:'👓',sunglasses:'👓',necklace:'💍',chain:'💍',cat:'🐱',dog:'🐶',default:'📦'};
+
+function getEmoji(name){
+  const n=name.toLowerCase();
+  for(const[k,v] of Object.entries(TYPE_ICONS)){if(n.includes(k))return v;}
+  return TYPE_ICONS.default;
+}
+
+const state={
+  page:'home',
+  items:JSON.parse(localStorage.getItem('reclaim_items')||'null')||DEMO_ITEMS,
+  search:'',
+  filterType:'all',
+  filterStatus:'all',
+  selectedItem:null,
+  showForm:false,
+  formType:'lost',
+  isAdmin:false,
+  photoPreview:null,
+  photoData:null,
+};
+
+function save(){localStorage.setItem('reclaim_items',JSON.stringify(state.items))}
+
+function toast(msg,type='success'){
+  const c=document.getElementById('toastContainer');
+  const t=document.createElement('div');
+  t.className=`toast ${type}`;
+  t.innerHTML=`<span>${type==='success'?'✅':'❌'}</span>${msg}`;
+  c.appendChild(t);
+  setTimeout(()=>{t.style.animation='slideIn 0.3s ease reverse';setTimeout(()=>t.remove(),300)},3000);
+}
+
+function render(){
+  document.getElementById('app').innerHTML=buildApp();
+  attachEvents();
+}
+
+function buildApp(){
+  return`
+  ${buildNav()}
+  ${state.page==='home'?buildHome():''}
+  ${state.page==='listings'?buildListings():''}
+  ${state.page==='admin'?buildAdmin():''}
+  ${state.showForm?buildFormModal():''}
+  ${state.selectedItem?buildDetailModal():''}
+  `;
+}
+
+function buildNav(){
+  const items=state.items;
+  const lost=items.filter(i=>i.status==='lost').length;
+  const found=items.filter(i=>i.status==='found').length;
+  return`<nav>
+    <div class="logo" onclick="goto('home')">Reclaim</div>
+    <div class="nav-links">
+      <button class="nav-btn" onclick="goto('listings')">Browse Items</button>
+      <button class="nav-btn" onclick="toggleAdmin()">${state.isAdmin?'Exit Admin':'Admin'}</button>
+      <button class="nav-btn primary" onclick="openForm('lost')">Report Item</button>
+    </div>
+  </nav>`;
+}
+
+function buildHome(){
+  const items=state.items;
+  const lost=items.filter(i=>i.status==='lost').length;
+  const found=items.filter(i=>i.status==='found').length;
+  const returned=items.filter(i=>i.status==='returned').length;
+  const recent=[...items].sort((a,b)=>b.createdAt-a.createdAt).slice(0,3);
+  return`
+  <div class="hero">
+    <div class="hero-badge">🔍 Community Lost & Found Platform</div>
+    <h1>Lost something?<br><span>We'll help you find it.</span></h1>
+    <p>Report lost or found items in your area. Connect with people in your community and reunite belongings with their owners.</p>
+    <div class="hero-btns">
+      <button class="btn-lost" onclick="openForm('lost')">🔍 Report Lost Item</button>
+      <button class="btn-found" onclick="openForm('found')">✨ Report Found Item</button>
+    </div>
+    <div class="stats">
+      <div class="stat"><div class="stat-n" style="color:var(--lost)">${lost}</div><div class="stat-l">Items Lost</div></div>
+      <div class="stat"><div class="stat-n" style="color:var(--found)">${found}</div><div class="stat-l">Items Found</div></div>
+      <div class="stat"><div class="stat-n" style="color:var(--returned)">${returned}</div><div class="stat-l">Returned</div></div>
+    </div>
+  </div>
+  <div class="section">
+    <div class="section-header">
+      <div class="section-title">Recently Posted</div>
+      <button class="nav-btn" onclick="goto('listings')">View All →</button>
+    </div>
+    <div class="cards-grid">
+      ${recent.map(buildCard).join('')}
+    </div>
+  </div>`;
+}
+
+function buildListings(){
+  let items=[...state.items];
+  if(state.search) items=items.filter(i=>i.name.toLowerCase().includes(state.search.toLowerCase())||i.location.toLowerCase().includes(state.search.toLowerCase()));
+  if(state.filterType!=='all') items=items.filter(i=>i.type===state.filterType);
+  if(state.filterStatus!=='all') items=items.filter(i=>i.status===state.filterStatus);
+  items=items.sort((a,b)=>b.createdAt-a.createdAt);
+  return`
+  <div class="section">
+    <div class="section-header">
+      <div class="section-title">All Items (${items.length})</div>
+      <div style="display:flex;gap:0.5rem">
+        <button class="nav-btn" onclick="openForm('lost')">+ Report Lost</button>
+        <button class="nav-btn primary" onclick="openForm('found')">+ Report Found</button>
+      </div>
+    </div>
+    <div class="filter-bar">
+      <div class="filter-row">
+        <div class="search-wrap">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <input type="text" placeholder="Search items or locations..." value="${state.search}" oninput="setSearch(this.value)"/>
+        </div>
+        <select onchange="setFilter('type',this.value)">
+          <option value="all" ${state.filterType==='all'?'selected':''}>All Types</option>
+          <option value="lost" ${state.filterType==='lost'?'selected':''}>Lost</option>
+          <option value="found" ${state.filterType==='found'?'selected':''}>Found</option>
+        </select>
+        <select onchange="setFilter('status',this.value)">
+          <option value="all" ${state.filterStatus==='all'?'selected':''}>All Status</option>
+          <option value="lost" ${state.filterStatus==='lost'?'selected':''}>Active Lost</option>
+          <option value="found" ${state.filterStatus==='found'?'selected':''}>Active Found</option>
+          <option value="returned" ${state.filterStatus==='returned'?'selected':''}>Returned</option>
+        </select>
+      </div>
+    </div>
+    ${items.length===0?`<div class="empty"><span class="empty-icon">🔭</span><h3>No items found</h3><p>Try adjusting your search or filters</p></div>`:
+    `<div class="cards-grid">${items.map(buildCard).join('')}</div>`}
+  </div>`;
+}
+
+function buildAdmin(){
+  return`
+  <div class="section">
+    <div class="admin-header">
+      <div class="admin-warning">⚠️</div>
+      <div><strong style="color:var(--text)">Admin Panel</strong> — You can remove fake or inappropriate posts from here.</div>
+    </div>
+    <div class="cards-grid">${state.items.map(item=>`
+      <div class="item-card">
+        <div class="card-img" style="height:140px">${item.photo?`<img src="${item.photo}" alt="${item.name}"/>`:`<span>${getEmoji(item.name)}</span>`}</div>
+        <div class="card-body">
+          <span class="card-status status-${item.status}">${EMOJIS[item.status]||'📦'} ${item.status}</span>
+          <div class="card-title">${item.name}</div>
+          <div class="card-meta"><div class="card-meta-row">📍 ${item.location}</div></div>
+          <div style="margin-top:1rem">
+            <button class="action-btn delete" style="width:100%;min-width:0" onclick="deleteItem('${item.id}')">🗑️ Remove Post</button>
+          </div>
+        </div>
+      </div>`).join('')}
+    </div>
+  </div>`;
+}
+
+function buildCard(item){
+  return`
+  <div class="item-card" onclick="selectItem('${item.id}')">
+    <div class="card-img">${item.photo?`<img src="${item.photo}" alt="${item.name}"/>`:`<span style="font-size:2.5rem">${getEmoji(item.name)}</span>`}</div>
+    <div class="card-body">
+      <span class="card-status status-${item.status}">${EMOJIS[item.status]||'📦'} ${item.status}</span>
+      <div class="card-title">${item.name}</div>
+      <div class="card-meta">
+        <div class="card-meta-row"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>${item.location}</div>
+        <div class="card-meta-row"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>${new Date(item.date).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})}</div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function buildFormModal(){
+  return`
+  <div class="overlay open" onclick="closeForm(event)">
+    <div class="modal" onclick="event.stopPropagation()">
+      <button class="modal-close" onclick="closeForm()">✕</button>
+      <div class="form-modal">
+        <div class="form-title">${state.formType==='lost'?'🔍 Report Lost Item':'✨ Report Found Item'}</div>
+        <div class="form-subtitle">${state.formType==='lost'?'Fill in the details to help others identify your lost item.':'Share details about the item you found to reunite it with its owner.'}</div>
+        <div class="form-grid">
+          <div class="field">
+            <label>Item Type</label>
+            <div class="type-toggle">
+              <button class="type-btn lost ${state.formType==='lost'?'active':''}" onclick="setFormType('lost')">🔍 I Lost This</button>
+              <button class="type-btn found ${state.formType==='found'?'active':''}" onclick="setFormType('found')">✨ I Found This</button>
+            </div>
+          </div>
+          <div class="field">
+            <label for="f-name">Item Name *</label>
+            <input type="text" id="f-name" placeholder="e.g. Black Leather Wallet"/>
+          </div>
+          <div class="field">
+            <label for="f-desc">Description *</label>
+            <textarea id="f-desc" placeholder="Describe the item in detail — color, brand, any distinguishing features..."></textarea>
+          </div>
+          <div class="field">
+            <label for="f-location">Location *</label>
+            <input type="text" id="f-location" placeholder="Where was it lost/found? e.g. Connaught Place, Delhi"/>
+          </div>
+          <div class="form-row">
+            <div class="field">
+              <label for="f-date">Date *</label>
+              <input type="date" id="f-date" value="${new Date().toISOString().split('T')[0]}"/>
+            </div>
+            <div class="field">
+              <label for="f-contact">Contact (Email or Phone) *</label>
+              <input type="text" id="f-contact" placeholder="your@email.com or +91..."/>
+            </div>
+          </div>
+          <div class="field">
+            <label>Photo (optional)</label>
+            <div class="photo-upload" onclick="document.getElementById('f-photo').click()">
+              <input type="file" id="f-photo" accept="image/*" onchange="handlePhoto(this)"/>
+              ${state.photoPreview?`<img src="${state.photoPreview}" class="photo-preview" alt="preview"/><p style="color:var(--text3);font-size:0.8rem;margin-top:0.5rem">Click to change photo</p>`:`<p style="color:var(--text3);font-size:0.875rem">📷 Click to upload a photo</p><p style="color:var(--text3);font-size:0.75rem;margin-top:0.25rem">JPG, PNG up to 5MB</p>`}
+            </div>
+          </div>
+          <button class="submit-btn" onclick="submitForm()">Submit Report →</button>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function buildDetailModal(){
+  const item=state.selectedItem;
+  if(!item)return'';
+  return`
+  <div class="overlay open" onclick="closeDetail(event)">
+    <div class="modal" onclick="event.stopPropagation()">
+      <button class="modal-close" onclick="closeDetail()">✕</button>
+      <div class="detail-img">${item.photo?`<img src="${item.photo}" alt="${item.name}"/>`:`<span>${getEmoji(item.name)}</span>`}</div>
+      <div class="detail-body">
+        <span class="card-status status-${item.status}" style="margin-bottom:1rem;display:inline-flex">${EMOJIS[item.status]||'📦'} ${item.status.charAt(0).toUpperCase()+item.status.slice(1)}</span>
+        <div class="detail-title">${item.name}</div>
+        <div class="detail-desc">${item.desc}</div>
+        <div class="detail-grid">
+          <div class="detail-field">
+            <div class="detail-field-label">📍 Location</div>
+            <div class="detail-field-value">${item.location}</div>
+          </div>
+          <div class="detail-field">
+            <div class="detail-field-label">📅 Date</div>
+            <div class="detail-field-value">${new Date(item.date).toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'})}</div>
+          </div>
+        </div>
+        <div class="map-placeholder">
+          <div class="map-dots"></div>
+          <span class="map-pin">📍</span>
+          <strong style="position:relative;z-index:1;color:var(--text2)">${item.location}</strong>
+          <div style="position:relative;z-index:1;font-size:0.75rem;margin-top:0.25rem">Open in maps for directions</div>
+          <button onclick="openMaps('${item.location}')" style="position:relative;z-index:1;margin-top:0.75rem;background:var(--accent-dim);border:1px solid rgba(124,106,255,0.3);color:var(--accent2);font-family:var(--font-body);font-size:0.8rem;padding:0.4rem 1rem;border-radius:8px;cursor:pointer">Open Google Maps ↗</button>
+        </div>
+        <div class="contact-box">
+          <div class="contact-label">Contact the ${item.type==='lost'?'Owner':'Finder'}</div>
+          <div class="contact-value">${item.contact}</div>
+        </div>
+        <div class="action-row">
+          ${item.status!=='returned'?`<button class="action-btn returned" onclick="markReturned('${item.id}')">🎉 Mark as Returned</button>`:''}
+          ${state.isAdmin?`<button class="action-btn delete" onclick="deleteItem('${item.id}');closeDetail()">🗑️ Remove Post</button>`:''}
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+// EVENT HANDLERS
+function goto(page){state.page=page;state.selectedItem=null;render()}
+function toggleAdmin(){
+  if(!state.isAdmin){
+    const pw=prompt('Enter admin password:');
+    if(pw==='admin123'){state.isAdmin=true;state.page='admin';toast('Admin mode activated','success')}
+    else{toast('Incorrect password','error')}
+  }else{state.isAdmin=false;state.page='home';}
+  render();
+}
+function openForm(type){state.formType=type;state.showForm=true;state.photoPreview=null;state.photoData=null;render()}
+function closeForm(e){if(!e||e.target.classList.contains('overlay')){state.showForm=false;render()}}
+function setFormType(t){state.formType=t;render()}
+function selectItem(id){state.selectedItem=state.items.find(i=>i.id===id)||null;render()}
+function closeDetail(e){if(!e||e.target.classList.contains('overlay')){state.selectedItem=null;render()}}
+function setSearch(v){state.search=v;render()}
+function setFilter(k,v){if(k==='type')state.filterType=v;else state.filterStatus=v;render()}
+function openMaps(loc){window.open(`https://maps.google.com/?q=${encodeURIComponent(loc)},'_blank'`)}
+
+function handlePhoto(input){
+  const file=input.files[0];
+  if(!file)return;
+  if(file.size>5*1024*1024){toast('File too large. Max 5MB.','error');return}
+  const r=new FileReader();
+  r.onload=e=>{state.photoPreview=e.target.result;state.photoData=e.target.result;render();};
+  r.readAsDataURL(file);
+}
+
+function submitForm(){
+  const name=document.getElementById('f-name').value.trim();
+  const desc=document.getElementById('f-desc').value.trim();
+  const location=document.getElementById('f-location').value.trim();
+  const date=document.getElementById('f-date').value;
+  const contact=document.getElementById('f-contact').value.trim();
+  if(!name||!desc||!location||!date||!contact){toast('Please fill in all required fields.','error');return}
+  if(contact.length<5){toast('Please enter a valid contact.','error');return}
+  const item={
+    id:Date.now().toString(),
+    type:state.formType,
+    name,desc,location,date,contact,
+    photo:state.photoData||'',
+    status:state.formType,
+    createdAt:Date.now()
+  };
+  state.items.unshift(item);
+  save();
+  state.showForm=false;
+  state.page='listings';
+  state.photoPreview=null;
+  state.photoData=null;
+  toast(`${state.formType==='lost'?'Lost':'Found'} item reported successfully! 🎉`,'success');
+  render();
+}
+
+function markReturned(id){
+  const item=state.items.find(i=>i.id===id);
+  if(item){item.status='returned';save();state.selectedItem=item;toast('Item marked as returned! 🎉','success');render();}
+}
+
+function deleteItem(id){
+  if(!confirm('Remove this post?'))return;
+  state.items=state.items.filter(i=>i.id!==id);
+  save();
+  toast('Post removed.','success');
+  render();
+}
+
+function attachEvents(){
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'){state.showForm=false;state.selectedItem=null;render();}},{once:true});
+}
+
+render();
+</script>
+</body>
+</html>
